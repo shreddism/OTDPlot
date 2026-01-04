@@ -15,7 +15,7 @@ use ratatui::{
     DefaultTerminal, Frame,
 };
 
-const ARRAY_HISTORY: usize = 10;
+const ARRAY_HISTORY: usize = 20;
 
 fn main() -> Result<()> {
     color_eyre::install()?;
