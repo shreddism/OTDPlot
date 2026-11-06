@@ -15,7 +15,10 @@ use ratatui::{
     DefaultTerminal, Frame,
 };
 
-const ARRAY_HISTORY: usize = 32;
+const ARRAY_HISTORY: usize = 32;    // how long data stays
+const X_WINDOW: [f64; 2] = [-160.0, 160.0];     // x and y window
+const Y_WINDOW: [f64; 2] = [-90.0, 90.0];       // change to aspect ratio
+const OTD_DAEMON_LOCATION: &str = "/home/user/OpenTabletDriver/bin/OpenTabletDriver.Daemon";
 
 fn main() -> Result<()> {
     color_eyre::install()?;
@@ -32,7 +35,7 @@ struct App {
 impl App {
     fn new() -> Self {
         Self {
-            window: [-160.0, 160.0],
+            window: X_WINDOW,
         }
     }
 
@@ -49,12 +52,12 @@ impl App {
 
         thread::spawn(move || {
 
-            let child = Command::new("/home/user/OpenTabletDriver/bin/OpenTabletDriver.Daemon")
+            let child = Command::new(OTD_DAEMON_LOCATION)
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn();
 
-            let stdout = child.unwrap().stdout.take().expect("OUCH!");
+            let stdout = child.unwrap().stdout.take().expect("fail?");
             let reader = BufReader::new(stdout);
 
             thread::spawn(move || {
@@ -236,7 +239,7 @@ impl App {
                     };
                     syinfo = syr;
                 },
-                val if val == "dd".to_string() => {
+                val if val == "dd".to_string() => {                         // actually draw
                     terminal.draw(|frame| self.draw(frame, arrayv, arraya, arrayj, arrays, mode, inputsens, zeropoint))?;
                     let timeout = tick_rate.saturating_sub(last_tick.elapsed());
                     if event::poll(timeout)? {
@@ -292,7 +295,7 @@ impl App {
                         }
                     }
                 },
-                val if val == "ii".to_string() => {
+                val if val == "ii".to_string() => {                             // take input without updating anything for async plugin
                     let timeout = tick_rate.saturating_sub(last_tick.elapsed());
                     if event::poll(timeout)? {
                         if let Event::Key(key) = event::read()? {
@@ -347,7 +350,7 @@ impl App {
                         }
                     }   
                 },
-                val if val == "tt".to_string() => {
+                val if val == "tt".to_string() => {         // don't remember why lasttick matters, input?
                     let mut index = ARRAY_HISTORY - 1;
                     arrayv[0].0 = 0.0;
                     arrayv[0].1 = vyinfo / vydiv;
@@ -396,10 +399,10 @@ impl App {
         let x_labels = vec![
             match mode {
                 0 => {Span::raw(format!("Press right to change mode and start using pen. Input sensitivity can be changed here with up/down."))},
-                1 => {Span::raw(format!("Velocity divisor can be changed here with up/down."))},
-                2 => {Span::raw(format!("Acceleration divisor can be changed here with up/down."))},
-                4 => {Span::raw(format!("Jerk divisor can be changed here with up/down."))},
-                8 => {Span::raw(format!("Snap divisor can be changed here with up/down."))},
+                1 => {Span::raw(format!("V divisor can be changed here with up/down."))},
+                2 => {Span::raw(format!("A divisor can be changed here with up/down."))},
+                4 => {Span::raw(format!("J divisor can be changed here with up/down."))},
+                8 => {Span::raw(format!("S divisor can be changed here with up/down."))},
                 _ => {Span::raw(format!(""))},
             }
         ];
@@ -462,7 +465,7 @@ impl App {
                     .title("")
                     .style(Style::default().fg(Color::Gray))
                     .labels([inputsens.to_string().into(), mode.to_string().into(), "".bold()])
-                    .bounds([-90.0, 90.0]),
+                    .bounds(Y_WINDOW),
             );
 
         frame.render_widget(&chart, area);
