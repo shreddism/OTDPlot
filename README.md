@@ -1,7 +1,7 @@
 - Usage:
   - might only work on linux
   - first go into OTD normally and enable example plugin, make sure it prints stuff out
-  - check constants in main.rs to see if they fit your setup (, screen aspect ratio, OTD location)
+  - check constants in main.rs to see if they fit your setup (number of points visible, screen aspect ratio, OTD location)
   - this tries opening OTD on its own, so have it closed
   - cargo r --release in OTDPlot/
   - OTD daemon should be running, you can use UX normally
