@@ -15,7 +15,7 @@ use ratatui::{
     DefaultTerminal, Frame,
 };
 
-const ARRAY_HISTORY: usize = 20;
+const ARRAY_HISTORY: usize = 32;
 
 fn main() -> Result<()> {
     color_eyre::install()?;
@@ -49,7 +49,7 @@ impl App {
 
         thread::spawn(move || {
 
-            let child = Command::new("otd-daemon")
+            let child = Command::new("/home/user/OpenTabletDriver/bin/OpenTabletDriver.Daemon")
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn();
@@ -63,7 +63,7 @@ impl App {
                     match line {
                         Ok(data) => { 
                             let mut identifier = data.clone();
-                            if (identifier.len() > 1) {
+                            if identifier.len() > 1  {
                                 identifier = identifier[..2].to_string();
 
                                 if identifier == "xx" {
@@ -140,7 +140,7 @@ impl App {
         let mut aydiv: f64 = 1.0;
         let mut jydiv: f64 = 1.0;
         let mut sydiv: f64 = 1.0;
-        let mut zeropoint: [(f64, f64); 2] = [(0.0_f64, 0.0_f64); 2];
+        let zeropoint: [(f64, f64); 2] = [(0.0_f64, 0.0_f64); 2];
             
         let tick_rate = Duration::from_nanos(1);
         let mut last_tick = Instant::now();
